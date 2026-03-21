@@ -87,7 +87,7 @@ export function Configurator() {
               <span className="w-4 h-4 bg-accent" />
               03 — {t.configurator.label}
             </div>
-            <h2 className="text-6xl md:text-8xl font-serif font-black text-foreground tracking-tighter leading-[0.9]">
+            <h2 className="text-5xl sm:text-6xl md:text-8xl font-serif font-black text-foreground tracking-tighter leading-[0.9]">
               {t.configurator.title_part1} <br/> <span className="italic font-light">{t.configurator.title_italic}</span>
             </h2>
           </div>
@@ -132,7 +132,7 @@ export function Configurator() {
           
           {/* Right Column - Configurator (SOLID GREEN as requested) */}
           <div className="lg:w-[65%] flex flex-col bg-accent text-white relative">
-            <div className="p-10 md:p-14 mb-[160px]">
+            <div className="p-10 md:p-14 mb-[280px] sm:mb-[220px] md:mb-[160px]">
               <div className="ui-label text-white/50 mb-8 font-black">{t.configurator.config_label}</div>
               <h3 className="text-4xl md:text-6xl font-serif font-black text-white mb-12 tracking-tight leading-[1]">{t.configurator.config_title}</h3>
               

@@ -55,7 +55,7 @@ export function AboutMe() {
                 />
               </div>
               {/* Overlapping text on photo */}
-              <div className="absolute -bottom-6 -left-6 bg-accent text-white px-6 py-4 z-20 ui-label shadow-[4px_4px_0px_var(--foreground)]">
+              <div className="absolute -bottom-4 -left-2 sm:-bottom-6 sm:-left-6 bg-accent text-white px-4 py-3 sm:px-6 sm:py-4 z-20 ui-label shadow-[4px_4px_0px_var(--foreground)]">
                 MATÚŠ BARANEC / 2026
               </div>
             </div>

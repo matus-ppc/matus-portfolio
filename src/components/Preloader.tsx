@@ -30,12 +30,12 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
           src="/profile-bw.webp" 
           alt="Preloader Texture" 
           fill 
-          className="object-cover grayscale contrast-125 opacity-40 mix-blend-multiply object-[center_10%] md:object-center" 
+          className="object-cover grayscale contrast-125 opacity-40 mix-blend-multiply md:object-center" 
           priority 
         />
         
-        {/* Jemný tieň / rozmazaný kruh na prekrytie vodoznaku v pravom dolnom rohu (len na mobile) */}
-        <div className="absolute -bottom-10 -right-10 w-[60vw] h-[60vw] max-w-[300px] max-h-[300px] bg-background md:hidden pointer-events-none rounded-full blur-3xl z-10 opacity-90" />
+        {/* Gradient fade na spodku fotky na prekrytie vodoznaku (len na mobile) */}
+        <div className="absolute inset-x-0 bottom-0 h-[40%] md:hidden pointer-events-none z-10" style={{ background: 'linear-gradient(to bottom, transparent 0%, #004225 100%)' }} />
       </motion.div>
 
       {/* 2. Scalable SVG Mask */}
