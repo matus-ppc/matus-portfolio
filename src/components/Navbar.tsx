@@ -1,25 +1,68 @@
-"use client";
-
 import * as React from "react";
+import { motion } from "framer-motion";
 import { ThemeToggle } from "./ThemeToggle";
+import { useLanguage } from "./LanguageProvider";
 
 export function Navbar() {
+  const { language, setLanguage, t } = useLanguage();
+
+  const navLinks = [
+    { name: t.nav.services, href: "#sluzby" },
+    { name: t.nav.results, href: "#vysledky" },
+    { name: t.nav.pricing, href: "#cennik" },
+    { name: t.nav.about, href: "#o-mne" }
+  ];
+
   return (
-    <header className="fixed top-0 w-full z-50 backdrop-blur-md bg-background/80 border-b border-foreground/10 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#" className="font-bold text-xl tracking-tight text-foreground hover:opacity-80 transition-opacity">
-          Matúš Baranec
+    <header className="fixed top-0 w-full z-50 bg-background border-b border-card-border">
+      <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+        
+        {/* LOGO */}
+        <a href="#" className="font-serif font-black text-xl tracking-tight text-foreground hover:italic transition-all">
+          MATÚŠ.
         </a>
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-foreground/80">
-          <a href="#sluzby" className="hover:text-accent transition-colors">Služby</a>
-          <a href="#o-mne" className="hover:text-accent transition-colors">O mne</a>
-          <a href="#skusenosti" className="hover:text-accent transition-colors">Skúsenosti</a>
-          <a href="#kontakt" className="hover:text-accent transition-colors">Kontakt</a>
-          <ThemeToggle />
+
+        {/* LINKS */}
+        <nav className="hidden md:flex items-center gap-12">
+          {navLinks.map((item) => (
+            <a 
+              key={item.href} 
+              href={item.href} 
+              className="ui-label text-foreground/70 hover:text-accent transition-colors relative group"
+            >
+              {item.name}
+              <span className="absolute left-0 -bottom-1 w-full h-[1px] bg-accent scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-300 ease-out" />
+            </a>
+          ))}
         </nav>
-        <div className="md:hidden flex items-center">
+
+        {/* CTA & ThemeToggle & LanguageToggle */}
+        <div className="flex items-center gap-4">
+          <div className="flex bg-muted p-1 border border-card-border overflow-hidden">
+            <button 
+              onClick={() => setLanguage("sk")}
+              className={`px-3 py-1 ui-label text-[10px] transition-colors ${language === 'sk' ? 'bg-accent text-white' : 'hover:bg-accent/10'}`}
+            >
+              SK
+            </button>
+            <button 
+              onClick={() => setLanguage("en")}
+              className={`px-3 py-1 ui-label text-[10px] transition-colors ${language === 'en' ? 'bg-accent text-white' : 'hover:bg-accent/10'}`}
+            >
+              EN
+            </button>
+          </div>
+          
           <ThemeToggle />
+          
+          <a 
+            href="#kontakt" 
+            className="ui-label bg-foreground text-background px-6 py-2 border border-foreground hover:bg-accent hover:text-white hover:border-accent transition-colors duration-200"
+          >
+            {t.nav.contact}
+          </a>
         </div>
+        
       </div>
     </header>
   );

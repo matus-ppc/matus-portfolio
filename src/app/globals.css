@@ -1,27 +1,133 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #1D1D1F;
-  --accent: #004225;
+  /* Editorial Brutalism - Light Mode */
+  --background: #FAFAFA;
+  --foreground: #0A0A0A;
+  --accent: #004225; /* TRUE British Racing Green */
+  --card: #FAFAFA;
+  --card-border: #0A0A0A;
+  --muted: #dddddd;
 }
 
-.dark {
-  --background: #000000;
-  --foreground: #F5F5F7;
-  --accent: #006437;
+.dark, [data-theme='dark'] {
+  /* Editorial Brutalism - Dark Mode */
+  --background: #0A0A0A;
+  --foreground: #FAFAFA;
+  --accent: rgb(25, 65, 40); /* Custom dark green as requested */
+  --card: #111111;
+  --card-border: #333333;
+  --muted: #222222;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  
   --font-sans: var(--font-inter);
-  --radius-xl: 16px;
+  --font-serif: var(--font-serif);
+  
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-full: 0px;
 }
 
-body {
+/* Base Body Styles */
+html, body {
   background-color: var(--background);
   color: var(--foreground);
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Global Transition for smoother theme switching */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Brutalist Card utility */
+.card-brutal {
+  background-color: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/* Hover Fills - British Racing Green background, White text */
+.card-brutal:hover {
+  background-color: var(--accent) !important;
+  color: #FFFFFF !important;
+  border-color: var(--accent) !important;
+}
+
+/* Ensure ALL nested elements turn white on card hover */
+.card-brutal:hover *,
+.card-brutal:hover span,
+.card-brutal:hover p,
+.card-brutal:hover h1,
+.card-brutal:hover h2,
+.card-brutal:hover h3,
+.card-brutal:hover h4,
+.card-brutal:hover div,
+.card-brutal:hover svg {
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  fill: #FFFFFF !important;
+}
+
+/* Special case for icon containers inside cards */
+.card-brutal:hover .bg-background {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Brutalist UI elements */
+.ui-label {
+  font-family: var(--font-inter);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(var(--card-border) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.05;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  background: rgba(120, 120, 120, 0.3);
+  outline: none;
+  border-radius: 0;
+  width: 100%;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 32px;
+  background: #FFFFFF;
+  cursor: pointer;
+  border: 1px solid #000000;
+  border-radius: 0;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 32px;
+  background: #FFFFFF;
+  cursor: pointer;
+  border: 1px solid #000000;
+  border-radius: 0;
 }
