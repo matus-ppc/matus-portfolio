@@ -18,6 +18,7 @@ const playfair = Playfair_Display({
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 export const metadata: Metadata = {
   title: "Matúš Baranec | PPC Špecialista",
@@ -46,6 +47,7 @@ export default function RootLayout({
   return (
     <html lang="sk" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased selection:bg-accent selection:text-white`}>
+        <GoogleTagManager gtmId="GTM-TVDNDNBZ" />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
