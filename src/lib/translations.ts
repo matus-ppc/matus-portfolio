@@ -100,6 +100,14 @@ export const translations = {
         "POKROČILÝ LOOKER STUDIO REPORT",
         "TVORBA REKLAMNÝCH TEXTOV"
       ],
+      landing_page_label: "VÝKONNOSTNÁ LANDING PAGE",
+      landing_page_price: "od 450 €",
+      landing_page_desc: "Extrémne rýchly, na mieru kódovaný one-page web optimalizovaný pre maximálny konverzný pomer z PPC kampaní. Vrátane analytiky (GTM, GA4).",
+      landing_page_tag: "JEDNORAZOVO",
+      simple_web_label: "JEDNODUCHÝ WEB",
+      simple_web_price: "od 700 €",
+      simple_web_desc: "Viacstránková firemná prezentácia s blogom a kontaktnými podstránkami, kódená na mieru.",
+      simple_web_tag: "JEDNORAZOVO",
       cta: "ODOSLAŤ DOPYT"
     },
     about: {
@@ -107,10 +115,11 @@ export const translations = {
       title_part1: "Unikátne ",
       title_italic: "prepojenie.",
       bio1: "Moja cesta začala spojením informatiky a žurnalistiky. Toto netradičné zázemie mi umožňuje dívať sa na marketing cez dva filtre: exaktná presnosť dát a emócia slova.",
-      bio2: "Rozumiem kódu v pozadí, vďaka čomu viem kampane nastaviť technicky bezchybne. Zároveň píšem – rozumiem, že za každým preklikom je človek motivovaný príbehom.",
+      bio2: "Rozumiem kódu v pozadí — vďaka čomu viem kampane nastaviť technicky bezchybne a zároveň klientom dodať rýchle, na konverzie optimalizované weby. Kvalitná kampaň bez kvalitného webu sú vyhodené peniaze. Preto ponúkam obe služby pod jednou strechou.",
       tiles: [
         "Informatika & Analytika",
         "Žurnalistika & Copywriting",
+        "Weby & Landing Pages",
         "Expanzia: SK • CZ • HU • RO • HR"
       ]
     },
@@ -245,6 +254,14 @@ export const translations = {
         "ADVANCED LOOKER STUDIO REPORT",
         "COPYWRITING OF AD TEXTS"
       ],
+      landing_page_label: "PERFORMANCE LANDING PAGE",
+      landing_page_price: "from 450 €",
+      landing_page_desc: "Ultra-fast, custom-coded one-page website optimized for maximum conversion rate from PPC campaigns. Including analytics setup (GTM, GA4).",
+      landing_page_tag: "ONE-TIME",
+      simple_web_label: "SIMPLE WEBSITE",
+      simple_web_price: "from 700 €",
+      simple_web_desc: "Multi-page corporate presentation with a blog and contact pages, custom-coded.",
+      simple_web_tag: "ONE-TIME",
       cta: "SEND INQUIRY"
     },
     about: {
@@ -252,10 +269,11 @@ export const translations = {
       title_part1: "Unique ",
       title_italic: "connection.",
       bio1: "My journey began with a combination of computer science and journalism. This non-traditional background allows me to look at marketing through two filters: exact data precision and word emotion.",
-      bio2: "I understand the code behind it, allowing me to set up campaigns technically flawlessly. At the same time, I write – understanding that behind every click is a person motivated by a story.",
+      bio2: "I understand the code behind it — allowing me to set up campaigns technically flawlessly and deliver fast, conversion-optimized websites to clients. A great campaign without a great website is wasted money. That's why I offer both services under one roof.",
       tiles: [
         "IT & Analytics",
         "Journalism & Copywriting",
+        "Websites & Landing Pages",
         "Expansion: SK • CZ • HU • RO • HR"
       ]
     },

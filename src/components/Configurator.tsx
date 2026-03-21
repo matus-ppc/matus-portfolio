@@ -14,6 +14,8 @@ export function Configurator() {
   const [feed, setFeed] = useState(false);
   const [reports, setReports] = useState(false);
   const [copywriting, setCopywriting] = useState(false);
+  const [landingPage, setLandingPage] = useState(false);
+  const [simpleWeb, setSimpleWeb] = useState(false);
   const [displayTotal, setDisplayTotal] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSource, setModalSource] = useState<"audit" | "inquiry">("audit");
@@ -30,22 +32,29 @@ export function Configurator() {
   const CONSULTING_RATE = 50;
 
   const calculateTotal = () => {
-    if (platforms.length === 0) return 0;
-    let total = BASE_FEE;
-    if (platforms.length > 1) {
-      const sortedPrices = platforms
-        .map(pId => PLATFORMS.find(x => x.id === pId)?.price ?? 0)
-        .sort((a, b) => b - a);
-      for (let i = 1; i < sortedPrices.length; i++) {
-        total += sortedPrices[i];
+    let total = 0;
+
+    if (platforms.length > 0) {
+      total += BASE_FEE;
+      if (platforms.length > 1) {
+        const sortedPrices = platforms
+          .map(pId => PLATFORMS.find(x => x.id === pId)?.price ?? 0)
+          .sort((a, b) => b - a);
+        for (let i = 1; i < sortedPrices.length; i++) {
+          total += sortedPrices[i];
+        }
       }
+      const extraHours = Math.max(0, hours - 1);
+      total += extraHours * EXTRA_HOUR;
+      total += consulting * CONSULTING_RATE;
+      if (feed) total += 120;
+      if (reports) total += 100;
+      if (copywriting) total += 80;
     }
-    const extraHours = Math.max(0, hours - 1);
-    total += extraHours * EXTRA_HOUR;
-    total += consulting * CONSULTING_RATE;
-    if (feed) total += 120;
-    if (reports) total += 100;
-    if (copywriting) total += 80;
+
+    if (landingPage) total += 450;
+    if (simpleWeb) total += 700;
+    
     return total;
   };
 
@@ -90,6 +99,8 @@ export function Configurator() {
     if (feed) active.push(t.configurator.addons[0]);
     if (reports) active.push(t.configurator.addons[1]);
     if (copywriting) active.push(t.configurator.addons[2]);
+    if (landingPage) active.push(t.configurator.landing_page_label);
+    if (simpleWeb) active.push(t.configurator.simple_web_label);
     return active;
   };
 
@@ -134,7 +145,14 @@ export function Configurator() {
               
               <div className="pt-8 border-t border-card-border mt-auto">
                 <p className="ui-label text-foreground/50 mb-4">{language === 'sk' ? 'Cena auditu' : 'Audit Price'}</p>
-                <div className="text-6xl font-serif font-black mb-8">{t.configurator.audit_price}</div>
+                <div className="text-6xl font-serif font-black mb-8 flex items-baseline gap-3">
+                  <span className="text-3xl font-sans font-bold opacity-60 tracking-tighter">
+                    {t.configurator.audit_price.split(" ")[0]}
+                  </span>
+                  <span>
+                    {t.configurator.audit_price.split(" ").slice(1).join(" ")}
+                  </span>
+                </div>
                 <button 
                   onClick={() => openModal("audit")}
                   className="w-full inline-flex items-center justify-between gap-2 bg-foreground text-background px-6 py-4 font-bold ui-label hover:bg-accent hover:text-white transition-colors border border-foreground cursor-pointer"
@@ -245,6 +263,77 @@ export function Configurator() {
                     </div>
                   ))}
                 </div>
+
+                {/* Landing Page Service */}
+                <div className="mt-6 border-t border-white/20 pt-6">
+                  <div 
+                    onClick={() => setLandingPage(!landingPage)}
+                    className={`cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 border border-white/20 gap-6 md:gap-8 transition-colors group ${landingPage ? 'bg-white text-accent' : 'bg-white/5 hover:bg-white/10'}`}
+                  >
+                    <div className="flex-1">
+                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3">
+                        <h4 className="text-xl md:text-2xl font-serif font-black">{t.configurator.landing_page_label}</h4>
+                        <span className={`ui-label px-2 py-1 text-[10px] w-fit ${landingPage ? 'bg-accent text-white' : 'bg-white/20 text-white'}`}>
+                          {t.configurator.landing_page_tag}
+                        </span>
+                      </div>
+                      <p className={`text-sm leading-relaxed max-w-xl ${landingPage ? 'text-accent/80' : 'text-white/60 group-hover:text-white/80'}`}>
+                        {t.configurator.landing_page_desc}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center justify-between w-full md:w-auto gap-8 border-t border-white/20 pt-6 md:border-none md:pt-0">
+                      <div className="flex items-baseline gap-2 justify-end text-left md:text-right">
+                        <span className="text-lg font-sans font-bold opacity-60 tracking-tighter">
+                          {t.configurator.landing_page_price.split(" ")[0]}
+                        </span>
+                        <span className={`text-2xl md:text-3xl font-serif font-black ${landingPage ? 'text-accent' : 'text-white'}`}>
+                          +{t.configurator.landing_page_price.split(" ")[1]} {t.configurator.landing_page_price.split(" ")[2]}
+                        </span>
+                      </div>
+                      
+                      <div className={`w-12 h-6 border flex items-center px-1 transition-colors shrink-0 ${landingPage ? 'border-accent bg-accent' : 'border-white/20 group-hover:border-white/50 bg-transparent'}`}>
+                        <div className={`w-4 h-4 bg-current transition-transform duration-200 ${landingPage ? 'text-white translate-x-5' : 'text-white translate-x-0'}`} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Simple Web Service */}
+                <div className="mt-0 border-t border-white/20 pt-6">
+                  <div 
+                    onClick={() => setSimpleWeb(!simpleWeb)}
+                    className={`cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 border border-white/20 gap-6 md:gap-8 transition-colors group ${simpleWeb ? 'bg-white text-accent' : 'bg-white/5 hover:bg-white/10'}`}
+                  >
+                    <div className="flex-1">
+                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3">
+                        <h4 className="text-xl md:text-2xl font-serif font-black">{t.configurator.simple_web_label}</h4>
+                        <span className={`ui-label px-2 py-1 text-[10px] w-fit ${simpleWeb ? 'bg-accent text-white' : 'bg-white/20 text-white'}`}>
+                          {t.configurator.simple_web_tag}
+                        </span>
+                      </div>
+                      <p className={`text-sm leading-relaxed max-w-xl ${simpleWeb ? 'text-accent/80' : 'text-white/60 group-hover:text-white/80'}`}>
+                        {t.configurator.simple_web_desc}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center justify-between w-full md:w-auto gap-8 border-t border-white/20 pt-6 md:border-none md:pt-0">
+                      <div className="flex items-baseline gap-2 justify-end text-left md:text-right">
+                        <span className="text-lg font-sans font-bold opacity-60 tracking-tighter">
+                          {t.configurator.simple_web_price.split(" ")[0]}
+                        </span>
+                        <span className={`text-2xl md:text-3xl font-serif font-black ${simpleWeb ? 'text-accent' : 'text-white'}`}>
+                          +{t.configurator.simple_web_price.split(" ")[1]} {t.configurator.simple_web_price.split(" ")[2]}
+                        </span>
+                      </div>
+                      
+                      <div className={`w-12 h-6 border flex items-center px-1 transition-colors shrink-0 ${simpleWeb ? 'border-accent bg-accent' : 'border-white/20 group-hover:border-white/50 bg-transparent'}`}>
+                        <div className={`w-4 h-4 bg-current transition-transform duration-200 ${simpleWeb ? 'text-white translate-x-5' : 'text-white translate-x-0'}`} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
             </div>

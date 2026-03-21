@@ -35,7 +35,7 @@ export function Results() {
                  whileInView={{ opacity: 1, y: 0 }}
                  viewport={{ once: true }}
                  transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                 className="bg-accent border border-white/10 p-8 md:p-12 relative flex flex-col justify-between min-h-[380px] group overflow-hidden"
+                 className="bg-accent border border-white/10 p-8 md:p-12 relative flex flex-col justify-start min-h-[380px] group overflow-hidden"
                >
                  {/* Jemný piktogram na vyplnenie priestoru rovnako ako v Službách */}
                  <Icon 
@@ -52,8 +52,16 @@ export function Results() {
                </div>
                
                <div className="relative z-10">
-                 <span className="text-6xl md:text-8xl font-serif font-black text-white tracking-tighter mb-4 block leading-[0.85]">
-                   {item.mainStat || (idx === 0 ? "+92%" : idx === 1 ? "7.0R" : idx === 2 ? "+115%" : idx === 3 ? "+210%" : idx === 4 ? "4.8R" : "-35%")}
+                 <span className="text-6xl md:text-8xl font-serif font-black text-white tracking-tighter mb-4 flex items-baseline leading-[0.85]">
+                   {(item.mainStat || (idx === 0 ? "+92%" : idx === 1 ? "7.0R" : idx === 2 ? "+115%" : idx === 3 ? "+210%" : idx === 4 ? "4.8R" : "-35%"))
+                     .split(/(%|R)/g)
+                     .map((part: string, i: number) => {
+                       if (part === "%" || part === "R") {
+                         return <span key={i} className="text-[0.6em] md:text-[0.65em] opacity-80 ml-1">{part}</span>;
+                       }
+                       return <span key={i}>{part}</span>;
+                     })
+                   }
                  </span>
                  <h4 className="ui-label mt-8 mb-4 border-t border-white/30 pt-4 text-white">
                    {item.title}
