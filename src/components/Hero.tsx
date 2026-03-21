@@ -64,7 +64,7 @@ export function Hero() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col gap-2"
           >
-            <div className="ui-label text-accent mb-4 flex items-center gap-4">
+            <div className="ui-label text-accent mb-4 flex items-center gap-4 text-[0.75rem] md:text-[0.85rem] tracking-[0.2em]">
               <span className="w-8 h-[1px] bg-accent" />
               {t.hero.role}
             </div>

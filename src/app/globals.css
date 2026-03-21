@@ -36,6 +36,15 @@
   --radius-full: 0px;
 }
 
+/* Metallic Paint Effect for Accent Backgrounds */
+.bg-accent {
+  background-color: var(--accent) !important;
+  background-image: 
+    linear-gradient(145deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.02) 25%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.3) 100%),
+    linear-gradient(75deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 15%) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+}
+
 /* Base Body Styles */
 html, body {
   background-color: var(--background);
