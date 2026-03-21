@@ -12,7 +12,7 @@ export function Contact() {
           <div className="flex flex-col items-center text-center space-y-12">
             <div className="ui-label text-accent font-black tracking-widest flex items-center gap-4">
               <span className="w-8 h-[1px] bg-accent" />
-              06 — {t.contact.label}
+              05 — {t.contact.label}
               <span className="w-8 h-[1px] bg-accent" />
             </div>
 

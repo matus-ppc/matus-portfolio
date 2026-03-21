@@ -15,10 +15,10 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 w-full z-50 bg-background border-b border-card-border">
-      <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         
         {/* LOGO */}
-        <a href="#" className="font-serif font-black text-xl tracking-tight text-foreground hover:italic transition-all">
+        <a href="#" className="font-serif font-black text-lg md:text-xl tracking-tight text-foreground hover:italic transition-all">
           MATÚŠ.
         </a>
 
@@ -37,17 +37,17 @@ export function Navbar() {
         </nav>
 
         {/* CTA & ThemeToggle & LanguageToggle */}
-        <div className="flex items-center gap-4">
-          <div className="flex bg-muted p-1 border border-card-border overflow-hidden">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex bg-muted p-0.5 md:p-1 border border-card-border overflow-hidden">
             <button 
               onClick={() => setLanguage("sk")}
-              className={`px-3 py-1 ui-label text-[10px] transition-colors ${language === 'sk' ? 'bg-accent text-white' : 'hover:bg-accent/10'}`}
+              className={`px-2 md:px-3 py-1 ui-label text-[10px] transition-colors ${language === 'sk' ? 'bg-accent text-white' : 'hover:bg-accent/10'}`}
             >
               SK
             </button>
             <button 
               onClick={() => setLanguage("en")}
-              className={`px-3 py-1 ui-label text-[10px] transition-colors ${language === 'en' ? 'bg-accent text-white' : 'hover:bg-accent/10'}`}
+              className={`px-2 md:px-3 py-1 ui-label text-[10px] transition-colors ${language === 'en' ? 'bg-accent text-white' : 'hover:bg-accent/10'}`}
             >
               EN
             </button>
@@ -57,7 +57,7 @@ export function Navbar() {
           
           <a 
             href="#kontakt" 
-            className="ui-label bg-foreground text-background px-6 py-2 border border-foreground hover:bg-accent hover:text-white hover:border-accent transition-colors duration-200"
+            className="ui-label bg-foreground text-background px-3 md:px-6 py-1.5 md:py-2 border border-foreground hover:bg-accent hover:text-white hover:border-accent transition-colors duration-200 text-[10px] md:text-xs"
           >
             {t.nav.contact}
           </a>

@@ -85,7 +85,7 @@ export function Configurator() {
           <div>
             <div className="ui-label text-accent mb-6 flex items-center gap-4">
               <span className="w-4 h-4 bg-accent" />
-              04 — {t.configurator.label}
+              03 — {t.configurator.label}
             </div>
             <h2 className="text-6xl md:text-8xl font-serif font-black text-foreground tracking-tighter leading-[0.9]">
               {t.configurator.title_part1} <br/> <span className="italic font-light">{t.configurator.title_italic}</span>

@@ -1,6 +1,7 @@
 import { useLanguage } from "./LanguageProvider";
 import { Section } from "./Section";
 import { motion } from "framer-motion";
+import { TrendingUp, Target, Activity, Zap, LineChart, PieChart } from "lucide-react";
 
 export function Results() {
   const { t } = useLanguage();
@@ -25,15 +26,22 @@ export function Results() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border border-card-border relative z-10">
-          {t.results.items.map((item: any, idx: number) => (
-             <motion.div 
-               key={idx} 
-               initial={{ opacity: 0, y: 50 }}
-               whileInView={{ opacity: 1, y: 0 }}
-               viewport={{ once: true }}
-               transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-               className="bg-accent border border-white/10 p-8 md:p-12 relative flex flex-col justify-between min-h-[380px] group"
-             >
+          {t.results.items.map((item: any, idx: number) => {
+             const Icon = [TrendingUp, Target, Activity, Zap, LineChart, PieChart][idx] || TrendingUp;
+             return (
+               <motion.div 
+                 key={idx} 
+                 initial={{ opacity: 0, y: 50 }}
+                 whileInView={{ opacity: 1, y: 0 }}
+                 viewport={{ once: true }}
+                 transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                 className="bg-accent border border-white/10 p-8 md:p-12 relative flex flex-col justify-between min-h-[380px] group overflow-hidden"
+               >
+                 {/* Jemný piktogram na vyplnenie priestoru rovnako ako v Službách */}
+                 <Icon 
+                   strokeWidth={0.5}
+                   className="absolute top-12 right-12 md:right-16 md:top-16 w-32 h-32 md:w-56 md:h-56 text-white/[0.05] transition-opacity duration-700 group-hover:text-white/[0.12] pointer-events-none z-0" 
+                 />
                <div className="flex justify-between items-start mb-16 relative z-10 transition-colors">
                  <div className="ui-label bg-white text-accent px-4 py-2">
                    {item.segment}
@@ -55,7 +63,8 @@ export function Results() {
                  </p>
                </div>
              </motion.div>
-          ))}
+             );
+          })}
         </div>
       </div>
     </Section>

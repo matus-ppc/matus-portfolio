@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, BarChart3 } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
 
 export function Hero() {
@@ -12,6 +12,27 @@ export function Hero() {
 
       {/* Topographic Background Grid */}
       <div className="bg-grid" />
+
+      {/* Jemné piktogramy (Lucide icons) namiesto abstraktných tvarov, vo farbe accent, s veľmi nízkou priehľadnosťou */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Vpravo hore */}
+        <Target 
+          strokeWidth={0.3} 
+          className="absolute -top-32 md:-right-32 right-[-20%] w-[500px] h-[500px] lg:w-[700px] lg:h-[700px] text-accent/[0.04] rotate-12" 
+        />
+        
+        {/* Vľavo dole */}
+        <TrendingUp 
+          strokeWidth={0.3} 
+          className="absolute -bottom-48 md:-left-48 left-[-30%] w-[600px] h-[600px] lg:w-[900px] lg:h-[900px] text-accent/[0.04] -rotate-6" 
+        />
+        
+        {/* Vpravo dole */}
+        <BarChart3 
+          strokeWidth={0.3} 
+          className="absolute bottom-0 right-[5%] lg:right-[15%] w-[300px] h-[300px] lg:w-[450px] lg:h-[450px] text-accent/[0.04] rotate-6" 
+        />
+      </div>
 
       {/* Endless Marquee Background */}
       <div className="absolute top-1/2 -translate-y-1/2 w-full overflow-hidden pointer-events-none opacity-[0.03] dark:opacity-[0.05] z-0 mix-blend-plus-lighter flex flex-col gap-6">

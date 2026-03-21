@@ -8,7 +8,7 @@ import { Services } from "@/components/Services";
 import { Results } from "@/components/Results";
 import { Configurator } from "@/components/Configurator";
 import { AboutMe } from "@/components/AboutMe";
-import { Experience } from "@/components/Experience";
+
 import { Contact } from "@/components/Contact";
 import { Preloader } from "@/components/Preloader";
 
@@ -48,7 +48,7 @@ export default function Home() {
         <Results />
         <Configurator />
         <AboutMe />
-        <Experience />
+
         <Contact />
       </motion.main>
     </>

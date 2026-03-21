@@ -15,7 +15,7 @@ export function AboutMe() {
           <div className="lg:w-[60%] flex flex-col justify-center">
             <div className="ui-label text-accent mb-6 flex items-center gap-4">
               <span className="w-4 h-4 bg-accent" />
-              05 — {t.about.label}
+              04 — {t.about.label}
             </div>
             
             <h2 className="text-5xl md:text-7xl lg:text-[6rem] font-serif font-black text-foreground mb-12 tracking-tighter leading-[0.95]">
