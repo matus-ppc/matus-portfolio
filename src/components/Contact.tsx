@@ -34,7 +34,7 @@ export function Contact() {
                 onClick={() => setModalOpen(true)}
                 className="group relative inline-block border-2 border-foreground px-4 md:px-12 py-6 bg-background hover:bg-accent transition-colors duration-200 cursor-pointer"
               >
-                <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-sans font-black text-foreground group-hover:text-white tracking-tighter transition-colors duration-200">
+                <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-sans font-bold text-foreground group-hover:text-white tracking-tighter transition-colors duration-200">
                   ahoj@matusbaranec.sk
                 </span>
                 <div className="absolute top-4 left-4 w-full h-full border-2 border-foreground -z-10 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-200 bg-foreground/5" />

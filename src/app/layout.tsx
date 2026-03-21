@@ -21,7 +21,21 @@ import { LanguageProvider } from "@/components/LanguageProvider";
 
 export const metadata: Metadata = {
   title: "Matúš Baranec | PPC Špecialista",
-  description: "Kde sa presné dáta krížia so silným príbehom. PPC marketing, analytika a stratégia.",
+  description: "Zvyšujem ziskovosť e-shopov a B2B firiem pomocou dátovo orientovaných PPC kampaní. Objednajte si audit alebo správu kampaní.",
+  openGraph: {
+    title: "Matúš Baranec | PPC Špecialista",
+    description: "Zvyšujem ziskovosť e-shopov a B2B firiem pomocou dátovo orientovaných PPC kampaní. Objednajte si audit alebo správu kampaní.",
+    url: "https://matusbaranec.vercel.app",
+    siteName: "Matúš Baranec",
+    locale: "sk_SK",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Matúš Baranec | PPC Špecialista",
+    description: "Zvyšujem ziskovosť e-shopov a B2B firiem pomocou dátovo orientovaných PPC kampaní. Objednajte si audit alebo správu kampaní.",
+  },
+  metadataBase: new URL("https://matusbaranec.vercel.app"),
 };
 
 export default function RootLayout({
