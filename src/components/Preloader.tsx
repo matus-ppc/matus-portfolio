@@ -30,7 +30,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
           src="/profile-bw.webp" 
           alt="Preloader Texture" 
           fill 
-          className="object-cover grayscale contrast-125 opacity-40 mix-blend-multiply" 
+          className="object-cover grayscale contrast-125 opacity-40 mix-blend-multiply object-[center_10%] md:object-center" 
           priority 
         />
       </motion.div>
