@@ -1,7 +1,42 @@
+"use client";
+
 import { useLanguage } from "./LanguageProvider";
 import { Section } from "./Section";
-import { motion } from "framer-motion";
+import { motion, useSpring, useTransform, useInView } from "framer-motion";
 import { TrendingUp, Target, Activity, Zap, LineChart, PieChart } from "lucide-react";
+import { useEffect, useRef } from "react";
+
+function AnimatedStat({ valueStr }: { valueStr: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  
+  const match = valueStr.match(/^([+-]?)(\d+(?:\.\d+)?)(.*)$/);
+  const prefix = match ? match[1] : "";
+  const num = match ? parseFloat(match[2]) : 0;
+  const suffix = match ? match[3] : "";
+  const isFloat = num % 1 !== 0;
+
+  const spring = useSpring(0, { bounce: 0, duration: 2000 });
+  const display = useTransform(spring, (current) => {
+    return isFloat ? current.toFixed(1) : Math.round(current).toString();
+  });
+
+  useEffect(() => {
+    if (isInView) {
+      spring.set(num);
+    }
+  }, [isInView, num, spring]);
+
+  if (!match) return <span>{valueStr}</span>;
+
+  return (
+    <span ref={ref} className="flex items-baseline">
+      {prefix && <span>{prefix}</span>}
+      <motion.span>{display}</motion.span>
+      {suffix && <span className="text-[0.6em] md:text-[0.65em] opacity-80 ml-1">{suffix}</span>}
+    </span>
+  );
+}
 
 export function Results() {
   const { t } = useLanguage();
@@ -53,15 +88,7 @@ export function Results() {
                
                <div className="relative z-10">
                  <span className="text-6xl md:text-8xl font-serif font-black text-white tracking-tighter mb-4 flex items-baseline leading-[0.85]">
-                   {(item.mainStat || (idx === 0 ? "+92%" : idx === 1 ? "7.0R" : idx === 2 ? "+115%" : idx === 3 ? "+210%" : idx === 4 ? "4.8R" : "-35%"))
-                     .split(/(%|R)/g)
-                     .map((part: string, i: number) => {
-                       if (part === "%" || part === "R") {
-                         return <span key={i} className="text-[0.6em] md:text-[0.65em] opacity-80 ml-1">{part}</span>;
-                       }
-                       return <span key={i}>{part}</span>;
-                     })
-                   }
+                   <AnimatedStat valueStr={item.mainStat || (idx === 0 ? "+92%" : idx === 1 ? "7.0R" : idx === 2 ? "+115%" : idx === 3 ? "+210%" : idx === 4 ? "4.8R" : "-35%")} />
                  </span>
                  <h4 className="ui-label mt-8 mb-4 border-t border-white/30 pt-4 text-white">
                    {item.title}

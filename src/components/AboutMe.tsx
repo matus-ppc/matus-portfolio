@@ -32,9 +32,9 @@ export function AboutMe() {
               {t.about.tiles.map((tile: string, idx: number) => (
                 <div 
                   key={idx}
-                  className="bg-accent border border-accent p-8 flex flex-col items-center justify-center text-center gap-4 text-white hover:bg-white hover:text-accent transition-colors duration-300 group"
+                  className="bg-accent border border-accent p-8 flex flex-col items-center justify-center text-center gap-4 text-white transition-colors duration-300"
                 >
-                  <span className="ui-label text-white group-hover:text-accent transition-colors tracking-widest leading-relaxed">
+                  <span className="ui-label text-white tracking-widest leading-relaxed">
                     {tile}
                   </span>
                 </div>

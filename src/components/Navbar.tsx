@@ -16,10 +16,9 @@ export function Navbar() {
   return (
     <header className="fixed top-0 w-full z-50 bg-background border-b border-card-border">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-        
         {/* LOGO */}
         <a href="#" className="font-serif font-black text-lg md:text-xl tracking-tight text-foreground hover:italic transition-all">
-          MATÚŠ.
+          M.
         </a>
 
         {/* LINKS */}
