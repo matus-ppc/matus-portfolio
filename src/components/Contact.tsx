@@ -1,8 +1,13 @@
+"use client";
+
+import { useState } from "react";
 import { Section } from "./Section";
 import { useLanguage } from "./LanguageProvider";
+import { ContactModal } from "./ContactModal";
 
 export function Contact() {
   const { t } = useLanguage();
+  const [modalOpen, setModalOpen] = useState(false);
   
   return (
     <>
@@ -25,15 +30,15 @@ export function Contact() {
             </h2>
 
             <div className="w-full max-w-5xl group relative">
-              <a 
-                href="mailto:ahoj@matusbaranec.sk" 
-                className="group relative inline-block border-2 border-foreground px-4 md:px-12 py-6 bg-background hover:bg-accent transition-colors duration-200"
+              <button 
+                onClick={() => setModalOpen(true)}
+                className="group relative inline-block border-2 border-foreground px-4 md:px-12 py-6 bg-background hover:bg-accent transition-colors duration-200 cursor-pointer"
               >
                 <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-sans font-black text-foreground group-hover:text-white tracking-tighter transition-colors duration-200">
                   ahoj@matusbaranec.sk
                 </span>
                 <div className="absolute top-4 left-4 w-full h-full border-2 border-foreground -z-10 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-200 bg-foreground/5" />
-              </a>
+              </button>
             </div>
 
             <p className="ui-label text-foreground/40 font-bold uppercase tracking-widest mt-12">
@@ -49,6 +54,12 @@ export function Contact() {
           &copy; {new Date().getFullYear()} MATÚŠ BARANEC. {t.contact.copyright}
         </div>
       </footer>
+
+      <ContactModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        source="contact"
+      />
     </>
   );
 }

@@ -120,6 +120,28 @@ export const translations = {
       subtext: "Odpovedám zvyčajne do 24 hodín.",
       code: "KÓD: 700",
       copyright: "VŠETKY PRÁVA VYHRADENÉ."
+    },
+    modal: {
+      audit_label: "OBJEDNÁVKA AUDITU",
+      audit_title: "Objednať hĺbkový audit",
+      inquiry_label: "DOPYT NA SPRÁVU",
+      inquiry_title: "Odoslať dopyt",
+      contact_label: "KONTAKTNÝ FORMULÁR",
+      contact_title: "Napíšte mi",
+      summary: "ZHRNUTIE KONFIGURÁCIE",
+      name: "MENO",
+      name_placeholder: "Vaše meno",
+      email: "E-MAIL",
+      email_placeholder: "vas@email.sk",
+      phone: "TELEFÓN (VOLITEĽNÉ)",
+      phone_placeholder: "+421 ...",
+      message: "SPRÁVA",
+      message_placeholder: "Popíšte váš projekt alebo potreby...",
+      submit: "ODOSLAŤ DOPYT",
+      sending: "ODOSIELAM...",
+      success_title: "Ďakujem!",
+      success_desc: "Dopyt bol úspešne odoslaný. Ozvem sa vám čo najskôr.",
+      error: "Nastala chyba. Skúste to prosím znova."
     }
   },
   en: {
@@ -243,6 +265,28 @@ export const translations = {
       subtext: "I usually reply within 24 hours.",
       code: "CODE: 700",
       copyright: "ALL RIGHTS RESERVED."
+    },
+    modal: {
+      audit_label: "AUDIT ORDER",
+      audit_title: "Order a deep audit",
+      inquiry_label: "MANAGEMENT INQUIRY",
+      inquiry_title: "Send an inquiry",
+      contact_label: "CONTACT FORM",
+      contact_title: "Write to me",
+      summary: "CONFIGURATION SUMMARY",
+      name: "NAME",
+      name_placeholder: "Your name",
+      email: "E-MAIL",
+      email_placeholder: "your@email.com",
+      phone: "PHONE (OPTIONAL)",
+      phone_placeholder: "+421 ...",
+      message: "MESSAGE",
+      message_placeholder: "Describe your project or needs...",
+      submit: "SEND INQUIRY",
+      sending: "SENDING...",
+      success_title: "Thank you!",
+      success_desc: "Your inquiry was sent successfully. I will get back to you shortly.",
+      error: "An error occurred. Please try again."
     }
   }
 };

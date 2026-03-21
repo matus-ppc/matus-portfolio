@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Section } from "./Section";
 import { Check, ArrowRight, MonitorPlay, MousePointerClick, Smartphone, ShoppingCart } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
+import { ContactModal } from "./ContactModal";
 
 export function Configurator() {
   const { t, language } = useLanguage();
@@ -14,6 +15,8 @@ export function Configurator() {
   const [reports, setReports] = useState(false);
   const [copywriting, setCopywriting] = useState(false);
   const [displayTotal, setDisplayTotal] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalSource, setModalSource] = useState<"audit" | "inquiry">("audit");
 
   const PLATFORMS = [
     { id: "google", name: "Google Ads", icon: <MousePointerClick className="w-6 h-6" />, price: 250 },
@@ -77,6 +80,19 @@ export function Configurator() {
     }
   };
 
+  const openModal = (source: "audit" | "inquiry") => {
+    setModalSource(source);
+    setModalOpen(true);
+  };
+
+  const getActiveAddons = () => {
+    const active: string[] = [];
+    if (feed) active.push(t.configurator.addons[0]);
+    if (reports) active.push(t.configurator.addons[1]);
+    if (copywriting) active.push(t.configurator.addons[2]);
+    return active;
+  };
+
   return (
     <Section id="cennik" className="bg-background py-32 border-b border-card-border overflow-hidden">
       <div className="max-w-[1400px] mx-auto px-6">
@@ -119,13 +135,13 @@ export function Configurator() {
               <div className="pt-8 border-t border-card-border mt-auto">
                 <p className="ui-label text-foreground/50 mb-4">{language === 'sk' ? 'Cena auditu' : 'Audit Price'}</p>
                 <div className="text-6xl font-serif font-black mb-8">{t.configurator.audit_price}</div>
-                <a 
-                  href="#kontakt" 
-                  className="w-full inline-flex items-center justify-between gap-2 bg-foreground text-background px-6 py-4 font-bold ui-label hover:bg-accent hover:text-white transition-colors border border-foreground"
+                <button 
+                  onClick={() => openModal("audit")}
+                  className="w-full inline-flex items-center justify-between gap-2 bg-foreground text-background px-6 py-4 font-bold ui-label hover:bg-accent hover:text-white transition-colors border border-foreground cursor-pointer"
                 >
                   {t.configurator.audit_cta}
                   <ArrowRight className="w-4 h-4" />
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -246,18 +262,32 @@ export function Configurator() {
                 )}
               </div>
               
-              <a 
-                href="#kontakt" 
-                className="w-full sm:w-auto inline-flex items-center justify-between gap-6 bg-background text-foreground px-8 py-5 font-bold ui-label hover:bg-accent hover:text-white hover:shadow-[8px_8px_0px_#FFFFFF] border-2 border-background transition-all"
+              <button 
+                onClick={() => openModal("inquiry")}
+                className="w-full sm:w-auto inline-flex items-center justify-between gap-6 bg-background text-foreground px-8 py-5 font-bold ui-label hover:bg-accent hover:text-white hover:shadow-[8px_8px_0px_#FFFFFF] border-2 border-background transition-all cursor-pointer"
               >
                 {t.configurator.cta}
                 <ArrowRight className="w-5 h-5" />
-              </a>
+              </button>
             </div>
 
           </div>
         </div>
       </div>
+
+      {/* Contact Modal */}
+      <ContactModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        source={modalSource}
+        calculatorData={{
+          totalPrice: targetTotal,
+          platforms: platforms.map(pId => PLATFORMS.find(x => x.id === pId)?.name ?? pId),
+          hours,
+          consulting,
+          addons: getActiveAddons(),
+        }}
+      />
     </Section>
   );
 }
