@@ -18,9 +18,8 @@ const playfair = Playfair_Display({
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
-import { GoogleTagManager } from "@next/third-parties/google";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { CookieConsent } from "@/components/CookieConsent";
+import { ConsentScripts } from "@/components/ConsentScripts";
 
 export const metadata: Metadata = {
   title: "Matúš Baranec | PPC Špecialista",
@@ -41,6 +40,8 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://matusbaranec.vercel.app"),
 };
 
+import Script from "next/script";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -48,8 +49,54 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="sk" suppressHydrationWarning>
+      <head>
+        {/* Google Consent Mode v2 - Initialization */}
+        <Script
+          id="gtag-base"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              try {
+                var saved = localStorage.getItem("cookie-consent");
+                var settings = saved ? JSON.parse(saved) : null;
+                
+                gtag('consent', 'default', {
+                  'analytics_storage': (settings && settings.analytics) ? 'granted' : 'denied',
+                  'ad_storage': (settings && settings.marketing) ? 'granted' : 'denied',
+                  'ad_user_data': (settings && settings.marketing) ? 'granted' : 'denied',
+                  'ad_personalization': (settings && settings.marketing) ? 'granted' : 'denied'
+                });
+              } catch (e) {
+                gtag('consent', 'default', {
+                  'analytics_storage': 'denied',
+                  'ad_storage': 'denied',
+                  'ad_user_data': 'denied',
+                  'ad_personalization': 'denied'
+                });
+              }
+            `,
+          }}
+        />
+        {/* Google Analytics Script */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=G-257R591JPD`}
+          strategy="afterInteractive"
+        />
+        <Script
+          id="gtag-config"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              gtag('config', 'G-257R591JPD');
+            `,
+          }}
+        />
+      </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased selection:bg-accent selection:text-white`}>
-        <GoogleTagManager gtmId="GTM-TVDNDNBZ" />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -58,10 +105,12 @@ export default function RootLayout({
         >
           <LanguageProvider>
             {children}
+            <CookieConsent />
+            {/* Keeping ConsentScripts for Vercel Analytics/Speed Insights if they are still needed, 
+                but removing GTM from it since we use GA now as requested. */}
+            <ConsentScripts />
           </LanguageProvider>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

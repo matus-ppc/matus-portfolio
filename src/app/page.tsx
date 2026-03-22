@@ -32,7 +32,10 @@ export default function Home() {
     <>
       <AnimatePresence>
         {!loaderComplete && (
-          <Preloader onComplete={() => setLoaderComplete(true)} />
+          <Preloader onComplete={() => {
+            setLoaderComplete(true);
+            window.dispatchEvent(new CustomEvent("preloader-complete"));
+          }} />
         )}
       </AnimatePresence>
 
