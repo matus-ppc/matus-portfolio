@@ -69,8 +69,13 @@ export function Hero() {
               {t.hero.role}
             </div>
 
-            <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-serif font-black text-foreground leading-[1.05] tracking-tight">
-              {t.hero.title_part1}<span className="italic font-light">{t.hero.title_italic1}</span>{t.hero.title_part2} <br className="hidden md:block" /> <span className="text-accent italic font-light">{t.hero.title_italic2}</span>
+            <h1 className="text-5xl md:text-7xl lg:text-[6rem] font-serif font-light text-foreground leading-[1.05] tracking-tight">
+              {t.hero.title_part1}
+              <span className="font-black text-accent italic pr-2">{t.hero.title_italic1}</span>
+              <br />
+              {t.hero.title_part2} 
+              <br />
+              <span className="font-black text-accent italic whitespace-nowrap">{t.hero.title_italic2}</span>
             </h1>
           </motion.div>
         </div>
