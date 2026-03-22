@@ -40,8 +40,6 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://matusbaranec.vercel.app"),
 };
 
-import Script from "next/script";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -50,51 +48,7 @@ export default function RootLayout({
   return (
     <html lang="sk" suppressHydrationWarning>
       <head>
-        {/* Google Consent Mode v2 - Initialization */}
-        <Script
-          id="gtag-base"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-
-              try {
-                var saved = localStorage.getItem("cookie-consent");
-                var settings = saved ? JSON.parse(saved) : null;
-                
-                gtag('consent', 'default', {
-                  'analytics_storage': (settings && settings.analytics) ? 'granted' : 'denied',
-                  'ad_storage': (settings && settings.marketing) ? 'granted' : 'denied',
-                  'ad_user_data': (settings && settings.marketing) ? 'granted' : 'denied',
-                  'ad_personalization': (settings && settings.marketing) ? 'granted' : 'denied'
-                });
-              } catch (e) {
-                gtag('consent', 'default', {
-                  'analytics_storage': 'denied',
-                  'ad_storage': 'denied',
-                  'ad_user_data': 'denied',
-                  'ad_personalization': 'denied'
-                });
-              }
-            `,
-          }}
-        />
-        {/* Google Analytics Script */}
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=G-257R591JPD`}
-          strategy="afterInteractive"
-        />
-        <Script
-          id="gtag-config"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              gtag('config', 'G-257R591JPD');
-            `,
-          }}
-        />
+        {/* Google Analytics & GTM are handled conditionally in ConsentScripts component */}
       </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased selection:bg-accent selection:text-white`}>
         <ThemeProvider
