@@ -114,7 +114,7 @@ export const translations = {
       label: "KTO SOM",
       title_part1: "Unikátne ",
       title_italic: "prepojenie.",
-      bio1: "Moja cesta začala spojením informatiky a žurnalistiky. Toto netradičné zázemie mi umožňuje dívať sa na marketing cez dva filtre: exaktná presnosť dát a emócia slova.",
+      bio1: "Moja cesta začala štúdiom informatiky a žurnalistiky. Toto netradičné zázemie mi dnes, po viac ako 3 rokoch praxe v PPC marketingu (Google Ads a Facebook Ads), umožňuje dívať sa na kampane cez dva filtre: exaktná presnosť dát a emócia slova.",
       bio2: "Rozumiem kódu v pozadí — vďaka čomu viem kampane nastaviť technicky bezchybne a zároveň klientom dodať rýchle, na konverzie optimalizované weby. Kvalitná kampaň bez kvalitného webu sú vyhodené peniaze. Preto ponúkam obe služby pod jednou strechou.",
       tiles: [
         "Informatika & Analytika",
@@ -268,7 +268,7 @@ export const translations = {
       label: "WHO I AM",
       title_part1: "Unique ",
       title_italic: "connection.",
-      bio1: "My journey began with a combination of computer science and journalism. This non-traditional background allows me to look at marketing through two filters: exact data precision and word emotion.",
+      bio1: "My journey began by studying IT and journalism. Today, with over 3 years of experience in PPC marketing (Google Ads and Facebook Ads), this non-traditional background allows me to look at campaigns through two filters: exact data precision and word emotion.",
       bio2: "I understand the code behind it — allowing me to set up campaigns technically flawlessly and deliver fast, conversion-optimized websites to clients. A great campaign without a great website is wasted money. That's why I offer both services under one roof.",
       tiles: [
         "IT & Analytics",
