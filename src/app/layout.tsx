@@ -38,6 +38,9 @@ export const metadata: Metadata = {
     description: "Zvyšujem ziskovosť e-shopov a B2B firiem pomocou dátovo orientovaných PPC kampaní. Objednajte si audit alebo správu kampaní.",
   },
   metadataBase: new URL("https://ppcpro.sk"),
+  verification: {
+    google: "Vo9sx6EmqDPvmDJ94zI2QzdCIlAL5sokxF7CP9Zngys",
+  },
 };
 
 export default function RootLayout({
