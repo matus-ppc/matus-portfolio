@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Matúš Baranec | PPC Špecialista",
     description: "Zvyšujem ziskovosť e-shopov a B2B firiem pomocou dátovo orientovaných PPC kampaní. Objednajte si audit alebo správu kampaní.",
-    url: "https://matusbaranec.vercel.app",
+    url: "https://ppcpro.sk",
     siteName: "Matúš Baranec",
     locale: "sk_SK",
     type: "website",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: "Matúš Baranec | PPC Špecialista",
     description: "Zvyšujem ziskovosť e-shopov a B2B firiem pomocou dátovo orientovaných PPC kampaní. Objednajte si audit alebo správu kampaní.",
   },
-  metadataBase: new URL("https://matusbaranec.vercel.app"),
+  metadataBase: new URL("https://ppcpro.sk"),
 };
 
 export default function RootLayout({
