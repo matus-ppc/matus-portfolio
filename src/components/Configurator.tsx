@@ -18,7 +18,7 @@ const REPORTS_PRICE = 100;
 const COPY_PRICE = 80;
 
 /* ─── Deep-green for column 3 ────────────────────────── */
-const COL3_BG = "#0B241B";
+const COL3_BG = "#144533";
 
 /* ─── Animated counter hook ─────────────────────────── */
 function useAnimatedNumber(target: number, duration = 350) {
@@ -466,7 +466,7 @@ export function Configurator() {
             ═══════════════════════════════════════ */}
             <div
               style={{
-                background: "#F4F4F4",
+                background: "#E6E6E6",
                 borderRight: "1px solid var(--card-border)",
                 display: "flex",
                 flexDirection: "column",
