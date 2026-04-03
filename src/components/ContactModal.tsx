@@ -6,6 +6,7 @@ import { X, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
 
 interface CalculatorData {
+  startPrice: number;
   totalPrice: number;
   platforms: string[];
   hours: number;
@@ -29,6 +30,8 @@ export function ContactModal({ isOpen, onClose, source, calculatorData }: Contac
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const isSK = language === "sk";
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -66,7 +69,7 @@ export function ContactModal({ isOpen, onClose, source, calculatorData }: Contac
     const sourceLabel = source === "audit" ? "OBJEDNAŤ AUDIT" : source === "inquiry" ? "ODOSLAŤ DOPYT" : "KONTAKT";
     const subjectPrefix = source === "audit" ? "[AUDIT]" : source === "inquiry" ? "[DOPYT]" : "[KONTAKT]";
 
-    const formData: Record<string, string> = {
+    let formData: Record<string, string> = {
       access_key: WEB3FORMS_KEY,
       subject: `${subjectPrefix} Nový dopyt od ${name}`,
       from_name: name,
@@ -76,17 +79,20 @@ export function ContactModal({ isOpen, onClose, source, calculatorData }: Contac
       source_button: sourceLabel,
     };
 
-    // Only include calculator data for audit/inquiry sources
-    if (source !== "contact" && calculatorData) {
-      formData.estimated_price = `${calculatorData.totalPrice} €/mesiac`;
-      formData.selected_platforms = calculatorData.platforms.length > 0
-        ? calculatorData.platforms.join(", ")
-        : "Žiadne";
-      formData.management_hours = `${calculatorData.hours} h`;
-      formData.consulting_hours = `${calculatorData.consulting} h`;
-      formData.selected_addons = calculatorData.addons.length > 0
-        ? calculatorData.addons.join(", ")
-        : "Žiadne";
+    if (source === "audit" && calculatorData) {
+      formData.start_investment = "400 € (Samostatný Audit)";
+      formData.selected_services = "Hĺbkový Audit (samostatne)";
+    } else if (source === "inquiry" && calculatorData) {
+      formData.start_investment = `${calculatorData.startPrice} €`;
+      formData.monthly_management = `${calculatorData.totalPrice} € / mesiac`;
+      
+      const items = ["Hĺbkový Audit"];
+      if (calculatorData.platforms.length > 0) items.push(...calculatorData.platforms.map(p => `${p} Setup`));
+      if (calculatorData.hours > 0) items.push(`Správa ${calculatorData.hours}h`);
+      if (calculatorData.consulting > 0) items.push(`Konzultácie ${calculatorData.consulting}h`);
+      if (calculatorData.addons.length > 0) items.push(...calculatorData.addons);
+      
+      formData.selected_services = items.join(", ");
     }
 
     try {
@@ -133,7 +139,7 @@ export function ContactModal({ isOpen, onClose, source, calculatorData }: Contac
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 md:p-8 border-b border-foreground">
+            <div className="flex items-center justify-between p-6 md:p-8 border-b border-card-border pb-6">
               <div>
                 <div className="ui-label text-accent mb-2">
                   {source === "audit" ? m.audit_label : source === "inquiry" ? m.inquiry_label : m.contact_label}
@@ -164,23 +170,41 @@ export function ContactModal({ isOpen, onClose, source, calculatorData }: Contac
               </div>
             ) : (
               /* Form */
-              <form onSubmit={handleSubmit} className="p-6 md:p-8">
-                {/* Calculator Summary - only for audit/inquiry */}
-                {source !== "contact" && calculatorData && (
-                  <div className="mb-8 p-4 border border-card-border bg-accent/[0.03]">
-                    <div className="ui-label text-foreground/40 mb-3">{m.summary}</div>
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-3xl font-serif font-black text-foreground tracking-tight">
-                        {calculatorData.totalPrice} €
-                      </span>
-                      <span className="ui-label text-foreground/40">{t.configurator.per_month}</span>
-                    </div>
-                    {calculatorData.platforms.length > 0 && (
-                      <div className="ui-label text-foreground/50 text-[10px]">
-                        {calculatorData.platforms.join(" • ")}
-                        {calculatorData.addons.length > 0 && ` • ${calculatorData.addons.join(" • ")}`}
+              <form onSubmit={handleSubmit} className="p-6 md:p-8 pt-6">
+                {/* Calculator Summary */}
+                {source === "audit" && calculatorData && (
+                  <div className="mb-8 p-5 border border-card-border bg-[#F4F4F4]">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between items-baseline">
+                        <span className="ui-label text-[0.6rem] text-foreground/50">{isSK ? "INVESTÍCIA NA ŠTART (Jednorazovo):" : "START INVESTMENT (One-time):"}</span>
+                        <span className="text-xl font-serif font-black text-foreground">400 €</span>
                       </div>
-                    )}
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-black/5">
+                      <span className="ui-label text-[0.6rem] text-foreground/40">{isSK ? "ZVOLENÁ SLUŽBA:" : "SELECTED SERVICE:"}</span>
+                      <p className="font-sans text-xs font-bold text-foreground mt-1">{isSK ? "Hĺbkový Audit (samostatne)" : "Deep Audit (standalone)"}</p>
+                    </div>
+                  </div>
+                )}
+
+                {source === "inquiry" && calculatorData && (
+                  <div className="mb-8 p-5 border border-card-border bg-[#F4F4F4]">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex justify-between items-baseline">
+                        <span className="ui-label text-[0.65rem] text-foreground/50">{isSK ? "INVESTÍCIA NA ŠTART (Jednorazovo):" : "START INVESTMENT (One-time):"}</span>
+                        <span className="text-xl font-serif font-black text-foreground">{calculatorData.startPrice} €</span>
+                      </div>
+                      <div className="flex justify-between items-baseline pb-4 border-b border-black/5">
+                        <span className="ui-label text-[0.65rem] text-foreground/50">{isSK ? "MESAČNÁ SPRÁVA:" : "MONTHLY MANAGEMENT:"}</span>
+                        <span className="text-xl font-serif font-black text-accent">{calculatorData.totalPrice > 0 ? `${calculatorData.totalPrice} € / ${isSK ? "mesiac" : "mo"}` : "—"}</span>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <span className="ui-label text-[0.55rem] text-foreground/40 block mb-1.5">{isSK ? "ZOZNAM VYBRATÝCH POLOŽIEK:" : "SELECTED ITEMS:"}</span>
+                      <p className="font-sans text-[0.65rem] uppercase font-bold tracking-widest text-foreground/60 leading-relaxed">
+                        {["Hĺbkový Audit (400 €)", ...calculatorData.platforms.map(p => `${p} Setup`), calculatorData.hours > 0 ? `Správa ${calculatorData.hours}h` : null, calculatorData.consulting > 0 ? `Konzultácie ${calculatorData.consulting}h` : null, ...calculatorData.addons].filter(Boolean).join(" + ")}
+                      </p>
+                    </div>
                   </div>
                 )}
 

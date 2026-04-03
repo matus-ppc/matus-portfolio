@@ -2,367 +2,1058 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Section } from "./Section";
-import { Check, ArrowRight, MonitorPlay, MousePointerClick, Smartphone, ShoppingCart } from "lucide-react";
+import { Check, ArrowRight, MonitorPlay, MousePointerClick, Smartphone, ShoppingCart, ChevronRight } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
 import { ContactModal } from "./ContactModal";
 
+/* ─── Constants ─────────────────────────────────────── */
+const AUDIT_BASE = 400;
+const SETUP_PER_PLATFORM = 250;
+const PLATFORM_FEE = 250; // Google, Meta, TikTok
+const MANAGEMENT_HOURLY_RATE = 35; // 2. a dalsia hodina
+const HEUREKA_MONTHLY = 175; // Heureka/CSS sa uctuje fixne
+const CONSULTING_RATE = 50;
+const FEED_PRICE = 120;
+const REPORTS_PRICE = 100;
+const COPY_PRICE = 80;
+
+/* ─── Deep-green for column 3 ────────────────────────── */
+const COL3_BG = "#0B241B";
+
+/* ─── Animated counter hook ─────────────────────────── */
+function useAnimatedNumber(target: number, duration = 350) {
+  const [display, setDisplay] = useState(target);
+  const frame = useRef<number | null>(null);
+  useEffect(() => {
+    const start = display;
+    const diff = target - start;
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const p = Math.min((now - t0) / duration, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      setDisplay(Math.round(start + diff * e));
+      if (p < 1) frame.current = requestAnimationFrame(step);
+    };
+    frame.current = requestAnimationFrame(step);
+    return () => { if (frame.current) cancelAnimationFrame(frame.current); };
+  }, [target]); // eslint-disable-line react-hooks/exhaustive-deps
+  return display;
+}
+
+/* ─── Toggle Switch ──────────────────────────────────── */
+function Toggle({ on }: { on: boolean }) {
+  return (
+    <div
+      style={{
+        width: 44,
+        height: 24,
+        borderRadius: 0,
+        border: on ? "1px solid rgba(255,255,255,0.4)" : "1px solid rgba(255,255,255,0.25)",
+        background: on ? "rgba(255,255,255,0.2)" : "transparent",
+        display: "flex",
+        alignItems: "center",
+        padding: "0 3px",
+        flexShrink: 0,
+        transition: "background 0.2s",
+      }}
+    >
+      <div
+        style={{
+          width: 16,
+          height: 16,
+          background: on ? "#fff" : "rgba(255,255,255,0.35)",
+          transform: on ? "translateX(20px)" : "translateX(0)",
+          transition: "transform 0.2s, background 0.2s",
+          flexShrink: 0,
+        }}
+      />
+    </div>
+  );
+}
+
+/* ─── Compact Slider ─────────────────────────────────── */
+function CompactSlider({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  unit,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  unit: string;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 10 }}>
+        <span
+          style={{
+            fontFamily: "var(--font-inter)",
+            fontSize: "0.58rem",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            fontWeight: 700,
+            color: "rgba(255,255,255,0.55)",
+          }}
+        >
+          {label}
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: "1.8rem",
+            fontWeight: 900,
+            color: "#fff",
+            lineHeight: 1,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          {value} {unit}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        style={{ width: "100%", accentColor: "#fff", cursor: "pointer" }}
+      />
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+        <span style={{ fontFamily: "var(--font-inter)", fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>{min} {unit}</span>
+        <span style={{ fontFamily: "var(--font-inter)", fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>{max} {unit}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Main Component ──────────────────────────────────── */
 export function Configurator() {
   const { t, language } = useLanguage();
+
+  /* State */
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [hours, setHours] = useState(1);
   const [consulting, setConsulting] = useState(0);
   const [feed, setFeed] = useState(false);
   const [reports, setReports] = useState(false);
   const [copywriting, setCopywriting] = useState(false);
-  const [landingPage, setLandingPage] = useState(false);
-  const [simpleWeb, setSimpleWeb] = useState(false);
-  const [displayTotal, setDisplayTotal] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSource, setModalSource] = useState<"audit" | "inquiry">("audit");
 
   const PLATFORMS = [
-    { id: "google", name: "Google Ads", icon: <MousePointerClick className="w-6 h-6" />, price: 250 },
-    { id: "meta", name: "Meta Ads", icon: <Smartphone className="w-6 h-6" />, price: 250 },
-    { id: "tiktok", name: "TikTok Ads", icon: <MonitorPlay className="w-6 h-6" />, price: 250 },
-    { id: "heureka", name: "Heureka / CSS", icon: <ShoppingCart className="w-6 h-6" />, price: 150 },
+    { id: "google", name: "Google Ads", icon: <MousePointerClick style={{ width: 18, height: 18 }} /> },
+    { id: "meta", name: "Meta Ads", icon: <Smartphone style={{ width: 18, height: 18 }} /> },
+    { id: "tiktok", name: "TikTok Ads", icon: <MonitorPlay style={{ width: 18, height: 18 }} /> },
+    { id: "heureka", name: "Heureka / CSS", icon: <ShoppingCart style={{ width: 18, height: 18 }} /> },
   ];
 
-  const BASE_FEE = 250;
-  const EXTRA_HOUR = 25;
-  const CONSULTING_RATE = 50;
+  /* Pricing calculations */
+  const setupTotal = platforms.length * SETUP_PER_PLATFORM;
 
-  const calculateTotal = () => {
-    let total = 0;
-
-    if (platforms.length > 0) {
-      total += BASE_FEE;
-      if (platforms.length > 1) {
-        const sortedPrices = platforms
-          .map(pId => PLATFORMS.find(x => x.id === pId)?.price ?? 0)
-          .sort((a, b) => b - a);
-        for (let i = 1; i < sortedPrices.length; i++) {
-          total += sortedPrices[i];
-        }
-      }
-      const extraHours = Math.max(0, hours - 1);
-      total += extraHours * EXTRA_HOUR;
-      total += consulting * CONSULTING_RATE;
-      if (feed) total += 120;
-      if (reports) total += 100;
-      if (copywriting) total += 80;
-    }
-
-    if (landingPage) total += 450;
-    if (simpleWeb) total += 700;
+  const monthlyTotal = (() => {
+    if (platforms.length === 0) return 0;
     
-    return total;
-  };
-
-  const targetTotal = calculateTotal();
-  const animFrame = useRef<number | null>(null);
-
-  useEffect(() => {
-    const duration = 400;
-    const start = displayTotal;
-    const diff = targetTotal - start;
-    const startTime = performance.now();
-    const step = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayTotal(Math.round(start + diff * eased));
-      if (progress < 1) {
-        animFrame.current = requestAnimationFrame(step);
-      }
-    };
-    animFrame.current = requestAnimationFrame(step);
-    return () => {
-      if (animFrame.current) cancelAnimationFrame(animFrame.current);
-    };
-  }, [targetTotal]);
-
-  const togglePlatform = (id: string) => {
-    if (platforms.includes(id)) {
-      setPlatforms(platforms.filter(p => p !== id));
-    } else {
-      setPlatforms([...platforms, id]);
+    let t = 0;
+    
+    // Základ za zakliknuté platformy
+    const hasHeureka = platforms.includes("heureka");
+    const regularPlatforms = platforms.filter(p => p !== "heureka");
+    
+    // Fixne +250 € za každú bežnú platformu (táto suma už v sebe obsahuje prvú hodinu správy)
+    t += regularPlatforms.length * PLATFORM_FEE;
+    
+    // Špeciálna logika pre Heureka / CSS (fixná cena)
+    if (hasHeureka) {
+      t += HEUREKA_MONTHLY;
     }
-  };
+    
+    // Variabilná zložka podľa slideru
+    // Ak je vybratá aspoň jedna "veľká" platforma (Google, Meta, TikTok), prvá hodina je v cene
+    if (regularPlatforms.length > 0) {
+      t += Math.max(0, hours - 1) * MANAGEMENT_HOURLY_RATE;
+    }
+    // (Ak je vybratá len Heureka, slider nemá na cenu žiadny vplyv)
+    
+    // Konzultácie a fixné doplnkové služby
+    t += consulting * CONSULTING_RATE;
+    if (feed) t += FEED_PRICE;
+    if (reports) t += REPORTS_PRICE;
+    if (copywriting) t += COPY_PRICE;
+    
+    return t;
+  })();
+
+  // Always shows at least the base audit price (400€). Selecting platforms adds +250€ each.
+  const startTotal = AUDIT_BASE + setupTotal;
+  const displayMonthly = useAnimatedNumber(monthlyTotal);
+  const displayStart = useAnimatedNumber(startTotal);
+
+  const togglePlatform = (id: string) =>
+    setPlatforms((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+    );
 
   const openModal = (source: "audit" | "inquiry") => {
     setModalSource(source);
     setModalOpen(true);
   };
 
-  const getActiveAddons = () => {
-    const active: string[] = [];
-    if (feed) active.push(t.configurator.addons[0]);
-    if (reports) active.push(t.configurator.addons[1]);
-    if (copywriting) active.push(t.configurator.addons[2]);
-    if (landingPage) active.push(t.configurator.landing_page_label);
-    if (simpleWeb) active.push(t.configurator.simple_web_label);
-    return active;
-  };
+  const isSK = language === "sk";
+
+  /* Phase labels */
+  const phase1Label = isSK ? "DIAGNOSTIKA" : "DIAGNOSTICS";
+  const phase2Label = isSK ? "IMPLEMENTÁCIA" : "IMPLEMENTATION";
+  const phase3Label = isSK ? "OPTIMALIZÁCIA" : "OPTIMIZATION";
+  const auditSubLabel = isSK ? "Hĺbkový Audit" : "Deep Audit";
+  const setupSubLabel = isSK ? "Úvodné nastavenie" : "Initial Setup";
+  const mgmtSubLabel = isSK ? "Mesačná správa" : "Monthly Management";
+  const oneTime = isSK ? "Jednorazovo" : "One-time";
+  const monthly = isSK ? "Mesačne" : "Monthly";
+  const setupNote = isSK ? "Technický štart, trackovanie a príprava stratégie." : "Technical launch, tracking setup and strategy prep.";
+  const fixedPriceBadge = isSK ? "Fixná cena za aktiváciu: 250 € / platforma" : "Fixed activation fee: 250 € / platform";
+
+  const addonsList = [
+    { state: feed, setter: setFeed, label: isSK ? "Feed Management (Mergado)" : "Feed Management (Mergado)", price: FEED_PRICE },
+    { state: reports, setter: setReports, label: isSK ? "Pokročilý Looker Studio Report" : "Advanced Looker Studio Report", price: REPORTS_PRICE },
+    { state: copywriting, setter: setCopywriting, label: isSK ? "Tvorba reklamných textov" : "Copywriting of Ad Texts", price: COPY_PRICE },
+  ];
 
   return (
-    <Section id="cennik" className="bg-background py-32 border-b border-card-border overflow-hidden">
-      <div className="max-w-[1400px] mx-auto px-6">
-        
-        <div className="mb-24 flex flex-col md:flex-row justify-between items-end border-b border-card-border pb-12 gap-8">
-          <div>
-            <div className="ui-label text-accent mb-6 flex items-center gap-4">
-              <span className="w-4 h-4 bg-accent" />
+    <>
+      <Section id="cennik" className="bg-background border-b border-card-border overflow-hidden">
+        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px 80px" }}>
+
+          {/* Section header */}
+          <div
+            style={{
+              marginBottom: 56,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+              padding: "64px 0 40px",
+              borderBottom: "1px solid var(--card-border)",
+            }}
+          >
+            <div
+              className="ui-label"
+              style={{ color: "var(--accent)", display: "flex", alignItems: "center", gap: 12 }}
+            >
+              <span style={{ width: 14, height: 14, background: "var(--accent)", display: "inline-block" }} />
               03 — {t.configurator.label}
             </div>
-            <h2 className="text-5xl sm:text-6xl md:text-8xl font-serif font-black text-foreground tracking-tighter leading-[0.9]">
-              {t.configurator.title_part1} <br/> <span className="italic font-light">{t.configurator.title_italic}</span>
+            <h2
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "clamp(3rem, 8vw, 6rem)",
+                fontWeight: 900,
+                letterSpacing: "-0.03em",
+                lineHeight: 0.9,
+                color: "var(--foreground)",
+              }}
+            >
+              {t.configurator.title_part1}
+              <br />
+              <em style={{ fontStyle: "italic", fontWeight: 300 }}>{t.configurator.title_italic}</em>
             </h2>
+            <p
+              className="ui-label"
+              style={{ color: "var(--foreground)", opacity: 0.5, maxWidth: 340, textTransform: "uppercase" }}
+            >
+              {t.configurator.subtext}
+            </p>
           </div>
-          <div className="ui-label text-foreground text-right max-w-xs uppercase">
-            {t.configurator.subtext}
-          </div>
-        </div>
 
-        <div className="flex flex-col lg:flex-row gap-0 border border-card-border">
-          
-          {/* Left Column - Audit (WHITE as requested) */}
-          <div className="lg:w-[35%] flex-shrink-0 border-b lg:border-b-0 lg:border-r border-card-border flex flex-col bg-background text-foreground">
-            <div className="p-10 md:p-14 flex flex-col h-full">
-              <div className="ui-label text-accent mb-8 font-black">01 — {t.configurator.one_time}</div>
-              <h3 className="text-4xl md:text-6xl font-serif font-black mb-6 tracking-tight leading-[1]">{t.configurator.audit_title}</h3>
-              <p className="text-foreground/70 mb-12 text-lg">
-                {t.configurator.audit_desc}
-              </p>
-              
-              <ul className="space-y-6 mb-16 flex-grow ui-label text-xs tracking-widest text-foreground/80">
+          {/* ── Pricing Container & Grid ── */}
+          <div style={{ border: "1px solid var(--card-border)", display: "flex", flexDirection: "column" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr 1fr",
+              }}
+            className="pricing-grid"
+          >
+
+            {/* ═══════════════════════════════════════
+                COL 1 — DIAGNOSTIKA (white)
+            ═══════════════════════════════════════ */}
+            <div
+              style={{
+                background: "var(--background)",
+                borderRight: "1px solid var(--card-border)",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {/* Column header */}
+              <div
+                style={{
+                  padding: "28px 36px 24px",
+                  borderBottom: "1px solid var(--card-border)",
+                }}
+              >
+                <div
+                  className="ui-label"
+                  style={{
+                    color: "var(--accent)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 6,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-inter)",
+                      fontSize: "0.55rem",
+                      letterSpacing: "0.18em",
+                      fontWeight: 900,
+                      textTransform: "uppercase",
+                      color: "var(--accent)",
+                      opacity: 0.7,
+                    }}
+                  >
+                    01 —
+                  </span>
+                  {phase1Label}
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)",
+                    fontWeight: 900,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1,
+                    color: "var(--foreground)",
+                    marginBottom: 4,
+                  }}
+                >
+                  {auditSubLabel}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.78rem",
+                    color: "var(--foreground)",
+                    opacity: 0.5,
+                    marginTop: 8,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {t.configurator.audit_desc}
+                </p>
+              </div>
+
+              {/* Features list — fills vertical space */}
+              <ul style={{ flex: 1, padding: "32px 36px", display: "flex", flexDirection: "column", gap: 0 }}>
                 {t.configurator.audit_features.map((feature: string, idx: number) => (
-                  <li key={idx} className="flex items-start gap-4">
-                    <Check className="w-4 h-4 text-accent flex-shrink-0" />
-                    {feature}
+                  <li
+                    key={idx}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 14,
+                      padding: "18px 0",
+                      borderBottom: idx < t.configurator.audit_features.length - 1 ? "1px solid var(--card-border)" : "none",
+                    }}
+                  >
+                    <Check
+                      style={{
+                        width: 14,
+                        height: 14,
+                        color: "var(--accent)",
+                        flexShrink: 0,
+                        marginTop: 2,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "0.62rem",
+                        letterSpacing: "0.13em",
+                        textTransform: "uppercase",
+                        fontWeight: 700,
+                        color: "var(--foreground)",
+                        opacity: 0.75,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {feature}
+                    </span>
                   </li>
                 ))}
               </ul>
-              
-              <div className="pt-8 border-t border-card-border mt-auto">
-                <p className="ui-label text-foreground/50 mb-4">{language === 'sk' ? 'Cena auditu' : 'Audit Price'}</p>
-                <div className="text-6xl font-serif font-black mb-8 flex items-baseline gap-3">
-                  <span className="text-3xl font-sans font-bold opacity-60 tracking-tighter">
-                    {t.configurator.audit_price.split(" ")[0]}
-                  </span>
-                  <span>
-                    {t.configurator.audit_price.split(" ").slice(1).join(" ")}
-                  </span>
+
+              {/* Price footer */}
+              <div
+                style={{
+                  padding: "24px 36px 36px",
+                  borderTop: "1px solid var(--card-border)",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.58rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    color: "var(--foreground)",
+                    opacity: 0.4,
+                    marginBottom: 8,
+                  }}
+                >
+                  {isSK ? "Cena auditu" : "Audit Price"} · {oneTime}
                 </div>
-                <button 
+                <div
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "clamp(2.4rem, 4vw, 3.6rem)",
+                    fontWeight: 900,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1,
+                    color: "var(--foreground)",
+                    marginBottom: 20,
+                  }}
+                >
+                  {t.configurator.audit_price}
+                </div>
+                <button
+                  id="btn-objednat-audit"
                   onClick={() => openModal("audit")}
-                  className="w-full inline-flex items-center justify-between gap-2 bg-foreground text-background px-6 py-4 font-bold ui-label hover:bg-accent hover:text-white transition-colors border border-foreground cursor-pointer"
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 8,
+                    background: "var(--foreground)",
+                    color: "var(--background)",
+                    padding: "14px 20px",
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.62rem",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "background 0.2s, color 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "var(--accent)";
+                    (e.currentTarget as HTMLElement).style.color = "#fff";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "var(--foreground)";
+                    (e.currentTarget as HTMLElement).style.color = "var(--background)";
+                  }}
                 >
                   {t.configurator.audit_cta}
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight style={{ width: 14, height: 14 }} />
                 </button>
               </div>
             </div>
-          </div>
-          
-          {/* Right Column - Configurator (SOLID GREEN as requested) */}
-          <div className="lg:w-[65%] flex flex-col bg-accent text-white relative">
-            <div className="p-10 md:p-14 mb-[280px] sm:mb-[220px] md:mb-[160px]">
-              <div className="ui-label text-white/50 mb-8 font-black">{t.configurator.config_label}</div>
-              <h3 className="text-4xl md:text-6xl font-serif font-black text-white mb-12 tracking-tight leading-[1]">{t.configurator.config_title}</h3>
-              
-              {/* Step 1: Platforms */}
-              <div className="mb-16">
-                 <h4 className="ui-label text-white/60 mb-6 pb-4 border-b border-white/20">{t.configurator.step1}</h4>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border-t border-l border-white/20">
-                  {PLATFORMS.map(p => {
+
+            {/* ═══════════════════════════════════════
+                COL 2 — IMPLEMENTÁCIA (off-white)
+            ═══════════════════════════════════════ */}
+            <div
+              style={{
+                background: "#F4F4F4",
+                borderRight: "1px solid var(--card-border)",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {/* Column header */}
+              <div
+                style={{
+                  padding: "28px 36px 24px",
+                  borderBottom: "1px solid rgba(0,0,0,0.1)",
+                }}
+              >
+                <div
+                  className="ui-label"
+                  style={{
+                    color: "var(--accent)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 6,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-inter)",
+                      fontSize: "0.55rem",
+                      letterSpacing: "0.18em",
+                      fontWeight: 900,
+                      textTransform: "uppercase",
+                      color: "var(--accent)",
+                      opacity: 0.7,
+                    }}
+                  >
+                    02 —
+                  </span>
+                  {phase2Label}
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)",
+                    fontWeight: 900,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1,
+                    color: "#0A0A0A",
+                    marginBottom: 4,
+                  }}
+                >
+                  {setupSubLabel}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.78rem",
+                    color: "#0A0A0A",
+                    opacity: 0.5,
+                    marginTop: 8,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {setupNote}
+                </p>
+                {/* Single pricing badge — replaces repeated text in each row */}
+                <div
+                  style={{
+                    display: "inline-block",
+                    marginTop: 14,
+                    paddingBottom: 4,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-inter)",
+                      fontSize: "0.6rem",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontWeight: 700,
+                      color: "var(--accent)",
+                    }}
+                  >
+                    {fixedPriceBadge}
+                  </span>
+                </div>
+              </div>
+
+              {/* Platform checkboxes */}
+              <div style={{ flex: 1, padding: "28px 36px" }}>
+                <div
+                  style={{
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.58rem",
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    color: "#0A0A0A",
+                    opacity: 0.45,
+                    marginBottom: 16,
+                  }}
+                >
+                  {t.configurator.step1}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 0, border: "1px solid rgba(0,0,0,0.12)" }}>
+                  {PLATFORMS.map((p, idx) => {
                     const isActive = platforms.includes(p.id);
                     return (
-                      <div 
+                      <div
                         key={p.id}
+                        id={`platform-${p.id}`}
                         onClick={() => togglePlatform(p.id)}
-                        className={`cursor-pointer p-6 border-b border-r border-white/20 transition-colors flex items-center justify-between group ${isActive ? 'bg-white text-accent' : 'hover:bg-white/10'}`}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "16px 20px",
+                          background: isActive ? "var(--accent)" : "#fff",
+                          borderBottom: idx < PLATFORMS.length - 1 ? "1px solid rgba(0,0,0,0.1)" : "none",
+                          cursor: "pointer",
+                          transition: "background 0.18s",
+                        }}
                       >
-                        <div className="flex items-center gap-4">
-                          <div className={`${isActive ? 'text-accent' : 'text-white/40 group-hover:text-white'}`}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          <div style={{ color: isActive ? "rgba(255,255,255,0.7)" : "var(--accent)", flexShrink: 0 }}>
                             {p.icon}
                           </div>
                           <div>
-                            <div className="ui-label font-bold text-sm tracking-wider">{p.name}</div>
-                            <div className={`text-sm mt-1 font-mono font-bold ${isActive ? 'text-accent/80' : 'text-white/60 group-hover:text-white'}`}>+{p.price} €/{language === 'sk' ? 'mes.' : 'mo.'}</div>
+                            <span
+                              style={{
+                                display: "block",
+                                fontFamily: "var(--font-inter)",
+                                fontSize: "0.75rem",
+                                letterSpacing: "0.09em",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                color: isActive ? "#fff" : "#0A0A0A",
+                              }}
+                            >
+                              {p.name}
+                            </span>
+                            <span
+                              style={{
+                                display: "block",
+                                fontFamily: "var(--font-inter)",
+                                fontSize: "0.6rem",
+                                fontWeight: 500,
+                                color: isActive ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.4)",
+                                marginTop: 2,
+                              }}
+                            >
+                              +{p.id === "heureka" ? "175" : "250"} € / {isSK ? "mes." : "mo."}
+                            </span>
                           </div>
                         </div>
-                        <div className={`w-5 h-5 border flex items-center justify-center transition-colors ${isActive ? 'border-accent bg-accent' : 'border-white/20 group-hover:border-white/50'}`}>
-                          {isActive && <Check className="w-3 h-3 text-white stroke-[4]" />}
+                        {/* Checkbox */}
+                        <div
+                          style={{
+                            width: 20,
+                            height: 20,
+                            border: isActive ? "1px solid rgba(255,255,255,0.4)" : "1px solid rgba(0,0,0,0.2)",
+                            background: isActive ? "rgba(255,255,255,0.2)" : "transparent",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {isActive && (
+                            <Check style={{ width: 11, height: 11, color: "#fff", strokeWidth: 3.5 }} />
+                          )}
                         </div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </div>
 
-              {/* Step 2: Sliders */}
-              <div className="mb-16">
-                <h4 className="ui-label text-white/60 mb-8 pb-4 border-b border-white/20">{t.configurator.step2}</h4>
-                
-                <div className="space-y-12">
-                  <div>
-                    <div className="flex justify-between items-end mb-6">
-                      <span className="ui-label text-white">{t.configurator.step2_hours}</span>
-                      <span className="text-4xl font-serif font-black text-white tabular-nums leading-none">{hours} h</span>
-                    </div>
-                    <input 
-                      type="range" min="1" max="50" step="1" 
-                      value={hours} onChange={(e) => setHours(Number(e.target.value))}
-                      className="w-full accent-white"
-                    />
-                    <div className="flex justify-between mt-4 ui-label text-[10px] text-white/40">
-                      <span>1 h ({language === 'sk' ? 'ZÁKLAD' : 'BASE'})</span>
-                      <span>50 h (MAX)</span>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between items-end mb-6">
-                      <span className="ui-label text-white">{t.configurator.step2_cons}</span>
-                      <span className="text-4xl font-serif font-black text-white tabular-nums leading-none">{consulting} h</span>
-                    </div>
-                    <input 
-                      type="range" min="0" max="5" step="1" 
-                      value={consulting} onChange={(e) => setConsulting(Number(e.target.value))}
-                      className="w-full accent-white"
-                    />
-                    <div className="flex justify-between mt-4 ui-label text-[10px] text-white/40">
-                      <span>0 h</span>
-                      <span>5 h</span>
-                    </div>
-                  </div>
+              {/* Arrow indicator */}
+              <div
+                style={{
+                  padding: "20px 36px 32px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  borderTop: "1px solid rgba(0,0,0,0.08)",
+                }}
+              >
+                <ChevronRight style={{ width: 16, height: 16, color: "var(--accent)" }} />
+                <span
+                  style={{
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.13em",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    color: "#0A0A0A",
+                    opacity: 0.4,
+                  }}
+                >
+                  {isSK ? "Nasleduje mesačná optimalizácia" : "Monthly optimization follows"}
+                </span>
+              </div>
+            </div>
+
+            {/* ═══════════════════════════════════════
+                COL 3 — OPTIMALIZÁCIA (dark green)
+            ═══════════════════════════════════════ */}
+            <div
+              style={{
+                background: COL3_BG,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {/* Column header */}
+              <div
+                style={{
+                  padding: "28px 36px 24px",
+                  borderBottom: "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.58rem",
+                    letterSpacing: "0.18em",
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 6,
+                  }}
+                >
+                  <span style={{ opacity: 0.7 }}>03 —</span>
+                  {phase3Label}
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)",
+                    fontWeight: 900,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1,
+                    color: "#fff",
+                    marginBottom: 4,
+                  }}
+                >
+                  {mgmtSubLabel}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.78rem",
+                    color: "rgba(255,255,255,0.5)",
+                    marginTop: 8,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {isSK ? "Konfigurátor mesačnej správy vašich kampaní." : "Configurator for monthly campaign management."}
+                </p>
+              </div>
+
+              {/* Sliders */}
+              <div style={{ padding: "28px 36px 20px" }}>
+                <div
+                  style={{
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.58rem",
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    color: "rgba(255,255,255,0.4)",
+                    marginBottom: 20,
+                  }}
+                >
+                  {t.configurator.step2}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                  <CompactSlider
+                    label={t.configurator.step2_hours}
+                    value={hours}
+                    min={1}
+                    max={50}
+                    unit="h"
+                    onChange={setHours}
+                  />
+                  <CompactSlider
+                    label={t.configurator.step2_cons}
+                    value={consulting}
+                    min={0}
+                    max={5}
+                    unit="h"
+                    onChange={setConsulting}
+                  />
                 </div>
               </div>
-              
-              {/* Step 3: Addons */}
-              <div>
-                <h4 className="ui-label text-white/60 mb-6 pb-4 border-b border-white/20">{t.configurator.step3}</h4>
-                <div className="space-y-0 border-t border-l border-white/20">
-                  {[
-                    { state: feed, setter: setFeed, label: t.configurator.addons[0], price: 120 },
-                    { state: reports, setter: setReports, label: t.configurator.addons[1], price: 100 },
-                    { state: copywriting, setter: setCopywriting, label: t.configurator.addons[2], price: 80 },
-                  ].map((addon, idx) => (
-                    <div 
-                      key={idx} 
+
+              {/* Add-ons */}
+              <div style={{ flex: 1, padding: "0 36px 0" }}>
+                <div
+                  style={{
+                    fontFamily: "var(--font-inter)",
+                    fontSize: "0.58rem",
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    color: "rgba(255,255,255,0.4)",
+                    marginBottom: 14,
+                    paddingTop: 20,
+                    borderTop: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                >
+                  {t.configurator.step3}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                  {addonsList.map((addon, idx) => (
+                    <div
+                      key={idx}
+                      id={`addon-${idx}`}
                       onClick={() => addon.setter(!addon.state)}
-                      className={`cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-r border-white/20 gap-4 transition-colors group ${addon.state ? 'bg-white text-accent' : 'hover:bg-white/10'}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "14px 0",
+                        borderBottom: idx < addonsList.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none",
+                        cursor: "pointer",
+                        gap: 12,
+                      }}
                     >
-                      <div className="flex flex-col">
-                        <span className="ui-label block">{addon.label}</span>
-                        <span className={`text-sm mt-1 font-mono font-bold ${addon.state ? 'text-accent/80' : 'text-white/60 group-hover:text-white'}`}>+{addon.price} €/{language === 'sk' ? 'mes.' : 'mo.'}</span>
+                      <div>
+                        <div
+                          style={{
+                            fontFamily: "var(--font-inter)",
+                            fontSize: "0.65rem",
+                            letterSpacing: "0.1em",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            color: addon.state ? "#fff" : "rgba(255,255,255,0.7)",
+                          }}
+                        >
+                          {addon.label}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "var(--font-inter)",
+                            fontSize: "0.62rem",
+                            fontWeight: 700,
+                            color: addon.state ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.35)",
+                            marginTop: 2,
+                          }}
+                        >
+                          +{addon.price} €/{isSK ? "mes." : "mo."}
+                        </div>
                       </div>
-                      <div className={`w-12 h-6 border flex items-center px-1 transition-colors ${addon.state ? 'border-accent bg-accent' : 'border-white/20 group-hover:border-white/50 bg-transparent'}`}>
-                        <div className={`w-4 h-4 bg-current transition-transform duration-200 ${addon.state ? 'text-white translate-x-5' : 'text-white translate-x-0'}`} />
-                      </div>
+                      <Toggle on={addon.state} />
                     </div>
                   ))}
                 </div>
-
-                {/* Landing Page Service */}
-                <div className="mt-6 border-t border-white/20 pt-6">
-                  <div 
-                    onClick={() => setLandingPage(!landingPage)}
-                    className={`cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 border border-white/20 gap-6 md:gap-8 transition-colors group ${landingPage ? 'bg-white text-accent' : 'bg-white/5 hover:bg-white/10'}`}
-                  >
-                    <div className="flex-1">
-                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3">
-                        <h4 className="text-xl md:text-2xl font-serif font-black">{t.configurator.landing_page_label}</h4>
-                        <span className={`ui-label px-2 py-1 text-[10px] w-fit ${landingPage ? 'bg-accent text-white' : 'bg-white/20 text-white'}`}>
-                          {t.configurator.landing_page_tag}
-                        </span>
-                      </div>
-                      <p className={`text-sm leading-relaxed max-w-xl ${landingPage ? 'text-accent/80' : 'text-white/60 group-hover:text-white/80'}`}>
-                        {t.configurator.landing_page_desc}
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between w-full md:w-auto gap-8 border-t border-white/20 pt-6 md:border-none md:pt-0">
-                      <div className="flex items-baseline gap-2 justify-end text-left md:text-right">
-                        <span className="text-lg font-sans font-bold opacity-60 tracking-tighter">
-                          {t.configurator.landing_page_price.split(" ")[0]}
-                        </span>
-                        <span className={`text-2xl md:text-3xl font-serif font-black ${landingPage ? 'text-accent' : 'text-white'}`}>
-                          +{t.configurator.landing_page_price.split(" ")[1]} {t.configurator.landing_page_price.split(" ")[2]}
-                        </span>
-                      </div>
-                      
-                      <div className={`w-12 h-6 border flex items-center px-1 transition-colors shrink-0 ${landingPage ? 'border-accent bg-accent' : 'border-white/20 group-hover:border-white/50 bg-transparent'}`}>
-                        <div className={`w-4 h-4 bg-current transition-transform duration-200 ${landingPage ? 'text-white translate-x-5' : 'text-white translate-x-0'}`} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Simple Web Service */}
-                <div className="mt-0 border-t border-white/20 pt-6">
-                  <div 
-                    onClick={() => setSimpleWeb(!simpleWeb)}
-                    className={`cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 border border-white/20 gap-6 md:gap-8 transition-colors group ${simpleWeb ? 'bg-white text-accent' : 'bg-white/5 hover:bg-white/10'}`}
-                  >
-                    <div className="flex-1">
-                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3">
-                        <h4 className="text-xl md:text-2xl font-serif font-black">{t.configurator.simple_web_label}</h4>
-                        <span className={`ui-label px-2 py-1 text-[10px] w-fit ${simpleWeb ? 'bg-accent text-white' : 'bg-white/20 text-white'}`}>
-                          {t.configurator.simple_web_tag}
-                        </span>
-                      </div>
-                      <p className={`text-sm leading-relaxed max-w-xl ${simpleWeb ? 'text-accent/80' : 'text-white/60 group-hover:text-white/80'}`}>
-                        {t.configurator.simple_web_desc}
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between w-full md:w-auto gap-8 border-t border-white/20 pt-6 md:border-none md:pt-0">
-                      <div className="flex items-baseline gap-2 justify-end text-left md:text-right">
-                        <span className="text-lg font-sans font-bold opacity-60 tracking-tighter">
-                          {t.configurator.simple_web_price.split(" ")[0]}
-                        </span>
-                        <span className={`text-2xl md:text-3xl font-serif font-black ${simpleWeb ? 'text-accent' : 'text-white'}`}>
-                          +{t.configurator.simple_web_price.split(" ")[1]} {t.configurator.simple_web_price.split(" ")[2]}
-                        </span>
-                      </div>
-                      
-                      <div className={`w-12 h-6 border flex items-center px-1 transition-colors shrink-0 ${simpleWeb ? 'border-accent bg-accent' : 'border-white/20 group-hover:border-white/50 bg-transparent'}`}>
-                        <div className={`w-4 h-4 bg-current transition-transform duration-200 ${simpleWeb ? 'text-white translate-x-5' : 'text-white translate-x-0'}`} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
               </div>
-
             </div>
+          </div>
 
-            {/* Brutalist Sticky Summary Footer (Black Background for Contrast in Green Column) */}
-            <div className="absolute bottom-0 left-0 right-0 border-t-2 border-background bg-foreground p-8 flex flex-col sm:flex-row items-center justify-between gap-6 z-20 text-background">
-              <div>
-                <p className="ui-label text-background/60 mb-2 text-center sm:text-left">{t.configurator.summary_label}</p>
-                <div className="text-6xl md:text-7xl font-serif font-black flex items-baseline gap-2 justify-center sm:justify-start tabular-nums tracking-tighter leading-none text-background">
-                  {displayTotal} €
-                  <span className="text-xl font-sans font-bold opacity-40 uppercase tracking-widest">{t.configurator.per_month}</span>
-                </div>
-                {platforms.length > 0 && (
-                  <p className="ui-label text-background/50 text-[10px] mt-3 text-center sm:text-left">{t.configurator.summary_note}</p>
-                )}
-              </div>
-              
-              <button 
-                onClick={() => openModal("inquiry")}
-                className="w-full sm:w-auto inline-flex items-center justify-between gap-6 bg-background text-foreground px-8 py-5 font-bold ui-label hover:bg-accent hover:text-white hover:shadow-[8px_8px_0px_#FFFFFF] border-2 border-background transition-all cursor-pointer"
-              >
-                {t.configurator.cta}
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-
+            {/* ══════════════════════════════════════════════════
+            ══════════════════════════════════════════════════ */}
+            <div
+              id="recap-bar"
+              style={{
+                background: "#0A0A0A",
+                display: "flex",
+                alignItems: "stretch",
+                minHeight: 100,
+              }}
+              className="recap-bar"
+            >
+        {/* ── SEKCIA A: JEDNORAZOVÝ ŠTART ── */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "12px 32px",
+            borderRight: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-inter)",
+              fontSize: "0.5rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.4)",
+              marginBottom: 5,
+            }}
+          >
+            {isSK ? "Štart (Jednorazovo)" : "Start (One-time)"}
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+            <span
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "clamp(2.6rem, 5vw, 4rem)",
+                fontWeight: 900,
+                letterSpacing: "-0.03em",
+                lineHeight: 1,
+                color: "#ffffff",
+              }}
+            >
+              {displayStart} €
+            </span>
+            <span
+              style={{
+                fontFamily: "var(--font-inter)",
+                fontSize: "0.55rem",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.28)",
+                fontWeight: 700,
+              }}
+            >
+              {platforms.length === 0
+                ? isSK ? "Iba audit" : "Audit only"
+                : isSK ? `Audit + ${platforms.length}× setup` : `Audit + ${platforms.length}× setup`}
+            </span>
+          </div>
+          {/* Formula breakdown */}
+          <div
+            style={{
+              fontFamily: "var(--font-inter)",
+              fontSize: "0.58rem",
+              letterSpacing: "0.1em",
+              color: "rgba(255,255,255,0.22)",
+              fontWeight: 500,
+              marginTop: 6,
+            }}
+          >
+            [{isSK ? "400€ audit" : "400€ audit"}
+            {platforms.length > 0 && ` + (${platforms.length} × 250€) setup`}]
+            {" = "}{startTotal} €
           </div>
         </div>
+
+        {/* ── SEKCIA B: MESAČNÁ SPRÁVA ── */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "12px 32px",
+            borderRight: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-inter)",
+              fontSize: "0.5rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.4)",
+              marginBottom: 5,
+            }}
+          >
+            {isSK ? "Mesačná správa" : "Monthly Management"}
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <span
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "clamp(2.6rem, 5vw, 4rem)",
+                fontWeight: 900,
+                letterSpacing: "-0.03em",
+                lineHeight: 1,
+                color: platforms.length > 0 ? "#ffffff" : "rgba(255,255,255,0.2)",
+              }}
+            >
+              {platforms.length > 0 ? `${displayMonthly} €` : "—"}
+            </span>
+            {platforms.length > 0 && (
+              <span
+                style={{
+                  fontFamily: "var(--font-inter)",
+                  fontSize: "0.55rem",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                  fontWeight: 700,
+                }}
+              >
+                /{isSK ? "mesiac" : "month"}
+              </span>
+            )}
+            {platforms.length === 0 && (
+              <span
+                style={{
+                  fontFamily: "var(--font-inter)",
+                  fontSize: "0.55rem",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.2)",
+                  fontWeight: 700,
+                }}
+              >
+                {isSK ? "Vyberte platformu" : "Select a platform"}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* ── SEKCIA C: CTA ── */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0 32px",
+            flexShrink: 0,
+          }}
+        >
+          <button
+            id="btn-send-inquiry"
+            onClick={() => openModal("inquiry")}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              background: "#ffffff",
+              color: "#0A0A0A",
+              padding: "14px 28px",
+              fontFamily: "var(--font-inter)",
+              fontSize: "0.62rem",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              border: "none",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              transition: "background 0.2s, color 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "var(--accent)";
+              (e.currentTarget as HTMLElement).style.color = "#fff";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "#fff";
+              (e.currentTarget as HTMLElement).style.color = "#0A0A0A";
+            }}
+          >
+            {isSK ? "Odoslať dopyt" : "Send Inquiry"}
+            <ArrowRight style={{ width: 15, height: 15 }} />
+          </button>
+        </div>
       </div>
+     </div> {/* End Unified Container */}
+     </div> {/* End MaxWidth Wrapper */}
+    </Section>
+
+    {/* Responsive overrides */}
+      <style>{`
+        @media (max-width: 1023px) {
+          .pricing-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .pricing-grid > div {
+            border-right: none !important;
+            border-bottom: 1px solid var(--card-border);
+          }
+          .recap-bar {
+            flex-direction: column !important;
+            min-height: unset !important;
+          }
+          .recap-bar > div {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+          }
+          .recap-bar > div:last-child {
+            border-bottom: none !important;
+          }
+          #btn-send-inquiry {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
 
       {/* Contact Modal */}
       <ContactModal
@@ -370,13 +1061,18 @@ export function Configurator() {
         onClose={() => setModalOpen(false)}
         source={modalSource}
         calculatorData={{
-          totalPrice: targetTotal,
-          platforms: platforms.map(pId => PLATFORMS.find(x => x.id === pId)?.name ?? pId),
+          startPrice: startTotal,
+          totalPrice: monthlyTotal,
+          platforms: platforms.map((pId) => PLATFORMS.find((x) => x.id === pId)?.name ?? pId),
           hours,
           consulting,
-          addons: getActiveAddons(),
+          addons: [
+            ...(feed ? [t.configurator.addons[0]] : []),
+            ...(reports ? [t.configurator.addons[1]] : []),
+            ...(copywriting ? [t.configurator.addons[2]] : []),
+          ],
         }}
       />
-    </Section>
+    </>
   );
 }
